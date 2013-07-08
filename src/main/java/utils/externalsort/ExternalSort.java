@@ -13,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Hello world!
+ * Main class
  *
+ * @author fedin
  */
 public class ExternalSort {
 
