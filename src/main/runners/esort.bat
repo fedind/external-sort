@@ -1,0 +1,1 @@
+java -jar external-sort-1.0-SNAPSHOT.jar %*
