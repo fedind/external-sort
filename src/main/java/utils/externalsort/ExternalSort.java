@@ -19,8 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ExternalSort {
 
-    public static final int SINGLE_THREAD_BUF_SIZE = 2000000;
-
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length < 1) {
             printUsage();
