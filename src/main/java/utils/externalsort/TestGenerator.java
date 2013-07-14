@@ -14,11 +14,11 @@ import java.util.Random;
  */
 public class TestGenerator {
 
-    public static final int SIZE = 1024*1024*1024;
+    public static final int SIZE = 80000028;
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         final String fileName = "\\temp\\text.dat";
-        System.out.format("start: fileName = %s, SIZE = %s", fileName, SIZE);
+        System.out.format("start: fileName = %s, SIZE = %dkB\n", fileName, SIZE/1042);
         Timer timer = Timer.start();
         Random rand = new Random();
         DataOutputStream out = null;

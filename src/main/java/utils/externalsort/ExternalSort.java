@@ -47,7 +47,7 @@ public class ExternalSort {
         AtomicBoolean stop = new AtomicBoolean(false);
         if (threadNumber == 1) {
             Sorter.create(queue, fileName, stop).run();
-            Merger.create(queue, stop, calcBufferSize(threadNumber)).run();
+            Merger.create(queue, stop, calcBufferSize(threadNumber), 5).run();
         } else {
             Sorter.create(queue, fileName, stop).run();
             ExecutorService ex = Executors.newFixedThreadPool(threadNumber - 1);
@@ -59,7 +59,7 @@ public class ExternalSort {
         }
         System.out.println("final merge");
         if (queue.size() > 1) {
-            Merger.create(queue, stop, calcBufferSize(threadNumber));
+            Merger.create(queue, stop, calcBufferSize(threadNumber)).run();
         }
         Files.move(queue.remove().toPath(), Paths.get(resultFileName), StandardCopyOption.REPLACE_EXISTING);
         System.out.println(timer);

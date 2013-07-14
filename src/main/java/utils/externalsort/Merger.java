@@ -27,11 +27,11 @@ public class Merger implements Runnable {
         Merger merger = new Merger();
         merger.queue = queue;
         merger.stop = stop;
-        merger.maxMerger = maxMerge;
+        merger.maxMerge = maxMerge;
         merger.bufferSize = bufferSize / (maxMerge + 1);
         return merger;
     }
-    private int maxMerger;
+    private int maxMerge;
     private int bufferSize;
     private BlockingQueue<File> queue;
     AtomicBoolean stop;
@@ -105,7 +105,7 @@ public class Merger implements Runnable {
         while (true) {
             List<File> list = new ArrayList<File>();
             try {
-                queue.drainTo(list, maxMerger);
+                queue.drainTo(list, maxMerge);
                 if (list.size() == 1) {
                     queue.put(list.get(0));
                     if (stop.get()) {
