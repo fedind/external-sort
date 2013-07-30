@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author fedin
  */
 public class ExternalSort {
+    protected static final int MERGE_BLOCKS_NUMBER = 2;
+    protected static final int AWAIT_TIME = 1;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length < 1) {
@@ -47,19 +49,19 @@ public class ExternalSort {
         AtomicBoolean stop = new AtomicBoolean(false);
         if (threadNumber == 1) {
             Sorter.create(queue, fileName, stop).run();
-            Merger.create(queue, stop, calcBufferSize(threadNumber), 5).run();
+            Merger.create(queue, stop, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER).run();
         } else {
             Sorter.create(queue, fileName, stop).run();
             ExecutorService ex = Executors.newFixedThreadPool(threadNumber - 1);
             for (int i = 0; i < threadNumber - 1; i++) {
-                ex.execute(Merger.create(queue, stop, calcBufferSize(threadNumber)));
+                ex.execute(Merger.create(queue, stop, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER));
             }
             ex.shutdown();
-            ex.awaitTermination(1, TimeUnit.DAYS);
+            ex.awaitTermination(AWAIT_TIME, TimeUnit.DAYS);
         }
         System.out.println("final merge");
         if (queue.size() > 1) {
-            Merger.create(queue, stop, calcBufferSize(threadNumber)).run();
+            Merger.create(queue, stop, calcBufferSize(1)).run();
         }
         Files.move(queue.remove().toPath(), Paths.get(resultFileName), StandardCopyOption.REPLACE_EXISTING);
         System.out.println(timer);

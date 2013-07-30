@@ -40,6 +40,11 @@ public class Merger implements Runnable {
     }
 
     private File merge(List<File> inputs) throws IOException {
+        System.out.println("Merging files:");
+        for (File file : inputs) {
+            System.out.format("%s, size = %,dB\n", file, file.length());
+        }
+        System.out.format("maxMerge: %d, bufferSize: %d\n", maxMerge, bufferSize);
         final int length = inputs.size();
         final File result = File.createTempFile(Utils.TEMP_FILE_PREFIX, null);
         DataOutputStream out = null;
@@ -97,11 +102,13 @@ public class Merger implements Runnable {
                     throw new RuntimeException("Cannot delete file " + file);
                 }
             }
+            System.out.format("Merged to file %s, size = %,dB\n", result, result.length());
         }
 
     }
 
     public void run() {
+        System.out.println("Merger start");
         while (true) {
             List<File> list = new ArrayList<File>();
             try {
