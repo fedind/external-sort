@@ -53,7 +53,7 @@ public class Sorter implements Runnable {
                 final int sz = remaining < bufferSize ? remaining : bufferSize;
                 bytesProcessed += sz;
                 buf.get(arr, 0, sz);
-                Arrays.sort(arr, 0, sz);
+                Arrays.sort(arr, 0, sz);                
                 queue.put(Utils.saveTemp(arr, 0, sz));
             }
         } catch (Exception ex) {

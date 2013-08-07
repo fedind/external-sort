@@ -28,7 +28,8 @@ public class Merger implements Runnable {
         merger.queue = queue;
         merger.stop = stop;
         merger.maxMerge = maxMerge;
-        merger.bufferSize = bufferSize / (maxMerge + 1);
+        final int tmpSize = bufferSize / (maxMerge + 1);
+        merger.bufferSize = tmpSize - (tmpSize % 4);
         return merger;
     }
     private int maxMerge;
@@ -40,11 +41,6 @@ public class Merger implements Runnable {
     }
 
     private File merge(List<File> inputs) throws IOException {
-        System.out.println("Merging files:");
-        for (File file : inputs) {
-            System.out.format("%s, size = %,dB\n", file, file.length());
-        }
-        System.out.format("maxMerge: %d, bufferSize: %d\n", maxMerge, bufferSize);
         final int length = inputs.size();
         final File result = File.createTempFile(Utils.TEMP_FILE_PREFIX, null);
         DataOutputStream out = null;
@@ -78,11 +74,11 @@ public class Merger implements Runnable {
                         idx = i;
                     }
                 }
-                if (buf[idx].remaining() >= Utils.BYTE_TO_INT) {
+                if (buf[idx].remaining() > 0) {
                     heads[idx] = buf[idx].getInt();
                 } else {
                     buf[idx].clear();
-                    if (ch[idx].read(buf[idx]) >= Utils.BYTE_TO_INT) {
+                    if (ch[idx].read(buf[idx]) >= 0) {
                         buf[idx].flip();
                         heads[idx] = buf[idx].getInt();
                     } else {
@@ -104,11 +100,10 @@ public class Merger implements Runnable {
             }
             System.out.format("Merged to file %s, size = %,dB\n", result, result.length());
         }
-
     }
 
     public void run() {
-        System.out.println("Merger start");
+        System.out.println(Thread.currentThread() + "Merger start");
         while (true) {
             List<File> list = new ArrayList<File>();
             try {
