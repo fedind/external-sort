@@ -56,8 +56,13 @@ public class Utils {
             }
         } finally {
             Utils.close(out);
-            System.out.format("file: %s, size = %dB\n", tempFile, tempFile.length());
+            Utils.threadPrint(String.format("file: %s, size = %dB\n", tempFile, tempFile.length()));
         }
         return tempFile;
     }
+    
+    public static void threadPrint(String msg) {
+        System.out.format("%s: %s",Thread.currentThread(), msg);
+    }
+    
 }

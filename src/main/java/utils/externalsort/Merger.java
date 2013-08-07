@@ -98,12 +98,12 @@ public class Merger implements Runnable {
                     throw new RuntimeException("Cannot delete file " + file);
                 }
             }
-            System.out.format("Merged to file %s, size = %,dB\n", result, result.length());
+            Utils.threadPrint(String.format("Merged to file %s, size = %,dB\n", result, result.length()));
         }
     }
 
     public void run() {
-        System.out.println(Thread.currentThread() + "Merger start");
+        Utils.threadPrint("Merger start\n");
         while (true) {
             List<File> list = new ArrayList<File>();
             try {

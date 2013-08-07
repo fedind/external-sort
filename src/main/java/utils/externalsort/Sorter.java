@@ -35,17 +35,16 @@ public class Sorter implements Runnable {
 
     public void run() {
         File inputFile = new File(fileName);
-        System.out.format("Sorter.start: fileName = %s, size = %dB\n", inputFile, inputFile.length());
+        Utils.threadPrint(String.format("Sorter.start: fileName = %s, size = %dB\n", inputFile, inputFile.length()));
         int bytesProcessed = 0;
         FileInputStream is = null;        
         try {
             is = new FileInputStream(inputFile);
             FileChannel in = is.getChannel();
             IntBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0, in.size()).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
-            System.out.println("in.size() = " + in.size());
             Utils.memory();
             final int bufferSize = 5000000 / Utils.BYTE_TO_INT;
-            System.out.println("Sorter: bufferSize = " + bufferSize * Utils.BYTE_TO_INT);
+            Utils.threadPrint(String.format("Sorter.bufferSize = %d\n", bufferSize));
             int[] arr = new int[bufferSize];
             Utils.memory();
             int remaining = 0;
@@ -61,7 +60,7 @@ public class Sorter implements Runnable {
         } finally {
             Utils.close(is);
             stop.set(true);
-            System.out.format("Sorter.finish: bytesProcessed = %dB\n", bytesProcessed * Utils.BYTE_TO_INT);
+            Utils.threadPrint(String.format("Sorter.finish: bytesProcessed = %dB\n", bytesProcessed * Utils.BYTE_TO_INT));
         }
     }
 
