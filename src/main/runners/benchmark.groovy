@@ -12,11 +12,12 @@ for(inputFile in files){
             println "number of threads: $i"
             result << "$i\t"
             def start = System.nanoTime()
-            def cmd = """esort.bat $inputFile $i \\temp\\out${i}.dat"""
+            def cmd = "esort.bat $inputFile $i \\temp\\out${i}.dat"
             println cmd
-            def proc = cmd.execute()            
+            def proc = cmd.execute()
+            proc.consumeProcessOutput()
             proc.waitFor()
-            result << "${(System.nanoTime() - start)/1000000}ms\n"
+            result << "${(System.nanoTime() - start)/1000000}\n"
             println proc.text
         }        
     }
