@@ -1,1 +1,1 @@
-java -jar external-sort-1.0-SNAPSHOT.jar %* -Xmx8m -XX:MaxPermSize=8m 
+java -Xmx8m -XX:MaxPermSize=8m -jar external-sort-1.0-SNAPSHOT.jar %*
