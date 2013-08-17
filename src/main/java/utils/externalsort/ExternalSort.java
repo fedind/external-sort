@@ -9,7 +9,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -47,22 +46,21 @@ public class ExternalSort {
         System.out.format("Start external sort for file %s with %d number of threads\n", fileName, threadNumber);
         Timer timer = Timer.start();
         BlockingQueue<File> queue = new LinkedBlockingQueue<File>();
-        AtomicBoolean stop = new AtomicBoolean(false);
         if (threadNumber == 1) {
-            Sorter.create(queue, fileName, stop).run();
-            Merger.create(queue, stop, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER).run();
+            Sorter.sort(queue, fileName);
+            Merger.create(queue, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER).run();
         } else {
-            Sorter.create(queue, fileName, stop).run();
+            Sorter.sort(queue, fileName);
             ExecutorService ex = Executors.newFixedThreadPool(threadNumber - 1);
             for (int i = 0; i < threadNumber - 1; i++) {
-                ex.execute(Merger.create(queue, stop, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER));
+                ex.execute(Merger.create(queue, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER));
             }
             ex.shutdown();
             ex.awaitTermination(AWAIT_TIME, TimeUnit.DAYS);
         }
         System.out.println("final merge");
         if (queue.size() > 1) {
-            Merger.create(queue, stop, calcBufferSize(1)).run();
+            Merger.create(queue, calcBufferSize(1)).run();
         }
         Files.move(queue.remove().toPath(), Paths.get(resultFileName), StandardCopyOption.REPLACE_EXISTING);
         System.out.println(timer);

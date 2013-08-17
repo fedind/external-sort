@@ -14,7 +14,7 @@ import java.util.Random;
  */
 public class TestGenerator {
 
-    public static final int SIZE = 100 * 1024 * 1024;
+    public static final int SIZE = 10 * 1024 * 1024;
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         final String fileName = "\\temp\\text.dat";

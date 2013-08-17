@@ -19,14 +19,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class Merger implements Runnable {
 
-    public static Merger create(BlockingQueue<File> queue, AtomicBoolean stop, int bufferSize) {
-        return create(queue, stop, bufferSize, 2);
+    public static Merger create(BlockingQueue<File> queue, int bufferSize) {
+        return create(queue, bufferSize, 2);
     }
 
-    public static Merger create(BlockingQueue<File> queue, AtomicBoolean stop, int bufferSize, int maxMerge) {
+    public static Merger create(BlockingQueue<File> queue, int bufferSize, int maxMerge) {
         Merger merger = new Merger();
         merger.queue = queue;
-        merger.stop = stop;
         merger.maxMerge = maxMerge;
         final int tmpSize = bufferSize / (maxMerge + 1);
         merger.bufferSize = tmpSize - (tmpSize % 4);
@@ -35,7 +34,6 @@ public class Merger implements Runnable {
     private int maxMerge;
     private int bufferSize;
     private BlockingQueue<File> queue;
-    AtomicBoolean stop;
 
     private Merger() {
     }
@@ -110,9 +108,7 @@ public class Merger implements Runnable {
                 queue.drainTo(list, maxMerge);
                 if (list.size() == 1) {
                     queue.put(list.get(0));
-                    if (stop.get()) {
-                        return;
-                    }
+                    return;
                 } else if (list.size() > 1) {
                     queue.put(merge(list));
                 }

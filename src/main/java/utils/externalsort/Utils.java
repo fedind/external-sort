@@ -63,6 +63,5 @@ public class Utils {
     
     public static void threadPrint(String msg) {
         System.out.format("%s: %s",Thread.currentThread(), msg);
-    }
-    
+    }        
 }
