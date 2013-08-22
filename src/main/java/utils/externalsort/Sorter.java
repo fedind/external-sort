@@ -10,10 +10,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -58,31 +58,69 @@ public class Sorter {
     public static void parallelSort(final int[] arr, final int fromIndex, final int toIndex, final int threadsNumber) {
         final int len = toIndex - fromIndex;
         final int chunkSize = len / threadsNumber;
-        ExecutorService ex = Executors.newFixedThreadPool(threadsNumber);
+        final ExecutorService ex = Executors.newFixedThreadPool(threadsNumber);
+
         class Chunk {
 
-            public Chunk(Chunk next) {
-                this.next = next;
+            public Chunk(int start, int end) {
+                this.start = start;
+                this.end = end;
             }
-            Chunk next;
+            int start, end;
+
+            @Override
+            public String toString() {
+                return "Chunk{" + "start=" + start + ", end=" + end + '}';
+            }
         }
-        final List<Future<Chunk>> futures = new ArrayList<Future<Chunk>>();
+        List<Future<Chunk>> futures = new ArrayList<Future<Chunk>>();
         for (int i = 0; i < threadsNumber; i++) {
             final int idx = i;
-            Future<Chunk> submit = ex.submit(new Callable<Chunk>() {
-                public Chunk call() throws Exception {
+            futures.add(ex.submit(new Callable<Chunk>() {
+                @Override
+                public Chunk call() {
                     final int start = fromIndex + chunkSize * idx;
-                    if (idx == threadsNumber - 1) {
-                        Arrays.sort(arr, start, len);
-                    }
-                    final int end = start + chunkSize - 1;
+                    final int end = idx < threadsNumber - 1 ? start + chunkSize : fromIndex + len;
                     Arrays.sort(arr, start, end);
-                    return null;
-
+                    return new Chunk(start, end);
                 }
-            });
+            }));
         }
 
+        while (futures.size() > 1) {
+            final List<Future<Chunk>> tmp = new ArrayList<Future<Chunk>>();
+            for (int i = 0; i < futures.size() / 2; i++) {
+                final int idx = i;
+                final Future<Chunk> firstFuture = futures.get(idx * 2);
+                final Future<Chunk> secondFuture = futures.get(idx * 2 + 1);
+                tmp.add(ex.submit(new Callable<Chunk>() {
+                    @Override
+                    public Chunk call() {
+                        try {
+                            Chunk first = firstFuture.get();
+                            Chunk second = secondFuture.get();
+                            assert first.end == second.start;
+                            mergeSorted(arr, first.start, second.end, second.start);
+                            return new Chunk(first.start, second.end);
+                        } catch (Exception ex1) {
+                            throw new RuntimeException(ex1);
+                        }
+                    }
+                }));
+            }
+            if (futures.size() % 2 == 1) {
+                tmp.add(futures.get(futures.size() - 1));
+            }
+            futures.clear();
+            futures.addAll(tmp);
+        }
+        try {
+            futures.get(0).get();
+            ex.shutdown();
+            ex.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (Exception ex1) {
+            throw new RuntimeException(ex1);
+        }
     }
 
     public static void mergeSorted(int[] arr, int fromIndex, int toIndex, int splitIndex) {
@@ -98,8 +136,9 @@ public class Sorter {
             }
         }
         if (li < splitIndex) {
-            System.arraycopy(arr, li, arr, fromIndex + pos, splitIndex - pos);
+            System.arraycopy(arr, li, arr, fromIndex + pos, splitIndex - li);
         }
         System.arraycopy(result, 0, arr, fromIndex, pos);
+
     }
 }

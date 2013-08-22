@@ -1,10 +1,9 @@
 package utils.externalsort;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -12,19 +11,24 @@ import static org.junit.Assert.*;
  */
 public class SorterTest {
 
-    /**
-     * Test of parallelSort method, of class Sorter.
-     */
     @Test
     public void testParallelSort() {
-        System.out.println("parallelSort");
-        int[] arr = null;
-        int fromIndex = 0;
-        int toIndex = 0;
-        int threadsNumber = 1;
-        Sorter.parallelSort(arr, fromIndex, toIndex, threadsNumber);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        for (int threadNumber = 1; threadNumber < 9; threadNumber++) {
+            System.out.println("threadNumber = " + threadNumber);
+            int[] arr = new int[100];
+            Random r = new Random();
+            for (int i = 0; i < arr.length; i++) {
+                arr[i] = r.nextInt(100);
+            }
+            System.out.format("arr: %s\n", Arrays.toString(arr));
+
+            int[] expected = new int[arr.length];
+            System.arraycopy(arr, 0, expected, 0, arr.length);
+            Arrays.sort(expected);
+            Sorter.parallelSort(arr, 0, arr.length, threadNumber);
+            System.out.format("result: %s\n", Arrays.toString(arr));
+            Assert.assertArrayEquals(arr, expected);
+        }
     }
 
     /**
@@ -33,8 +37,14 @@ public class SorterTest {
     @Test
     public void testMergeSorted() {
         System.out.println("mergeSorted");
-        final int SPLIT_VALUE = 2;
-        int[] arr = {1, 10, 12, 13, 14, 15, 16, SPLIT_VALUE, 4, 6, 15, 20, 21};
+        testArray(new int[]{1, 10, 12, 13, 14, 15, 16, 2, 4, 6, 15, 20, 21}, 2);
+        testArray(new int[]{4, 6, 15, 20, 21, 0, 1, 10, 12, 13, 14, 15, 16}, 0);
+        testArray(new int[]{1, 10, 12, 13, 14, 2, 4, 6, 15, 20, 21}, 2);
+        
+        System.out.println("success");
+    }
+
+    private void testArray(int[] arr, final int splitValue) {
         System.out.format("tested array: %s\n", Arrays.toString(arr));
         int[] result = new int[arr.length];
         System.arraycopy(arr, 0, result, 0, arr.length);
@@ -42,7 +52,7 @@ public class SorterTest {
         System.out.format("expected array: %s\n", Arrays.toString(result));
         int splitIndex = -1;
         for (int i = 0; i < arr.length; i++) {
-            if (arr[i] == SPLIT_VALUE) {
+            if (arr[i] == splitValue) {
                 splitIndex = i;
                 break;
             }
@@ -51,7 +61,5 @@ public class SorterTest {
         Sorter.mergeSorted(arr, 0, arr.length, splitIndex);
         System.out.format("result: %s\n", Arrays.toString(arr));
         Assert.assertArrayEquals(arr, result);
-
-        System.out.println("success");
     }
 }
