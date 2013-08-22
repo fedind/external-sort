@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Sorter {
 
-    public static void sort(BlockingQueue<File> queue, String fileName) {
+    public static void sort(BlockingQueue<File> queue, String fileName, int threadNumber) {
         File inputFile = new File(fileName);
         Utils.threadPrint(String.format("Sorter.start: fileName = %s, size = %dB\n", inputFile, inputFile.length()));
         int bytesProcessed = 0;
@@ -40,7 +40,7 @@ public class Sorter {
                 final int sz = remaining < bufferSize ? remaining : bufferSize;
                 bytesProcessed += sz;
                 buf.get(arr, 0, sz);
-                Arrays.sort(arr, 0, sz);
+                parallelSort(arr, 0, sz, threadNumber);
                 queue.put(Utils.saveTemp(arr, 0, sz));
             }
         } catch (Exception ex) {

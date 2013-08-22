@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @author fedin
  */
 public class ExternalSort {
+
     protected static final int MERGE_BLOCKS_NUMBER = 2;
     protected static final int AWAIT_TIME = 1;
 
@@ -46,10 +47,10 @@ public class ExternalSort {
         Timer timer = Timer.start();
         BlockingQueue<File> queue = new LinkedBlockingQueue<File>();
         if (threadNumber == 1) {
-            Sorter.sort(queue, fileName);
+            Sorter.sort(queue, fileName, threadNumber);
             Merger.create(queue, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER).run();
         } else {
-            Sorter.sort(queue, fileName);
+            Sorter.sort(queue, fileName, threadNumber);
             ExecutorService ex = Executors.newFixedThreadPool(threadNumber - 1);
             for (int i = 0; i < threadNumber - 1; i++) {
                 ex.execute(Merger.create(queue, calcBufferSize(threadNumber), MERGE_BLOCKS_NUMBER));
